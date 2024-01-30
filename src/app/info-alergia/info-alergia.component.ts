@@ -1,18 +1,18 @@
-import {Component, OnInit} from '@angular/core';
-import {ConfirmationService, LazyLoadEvent, MessageService} from "primeng/api";
-import {Alergia} from "../../domain/Alergia";
-import {AlergiaService} from "../../services/alergia.service";
-import {ToastModule} from "primeng/toast";
-import {ToolbarModule} from "primeng/toolbar";
-import {ButtonModule} from "primeng/button";
-import {RippleModule} from "primeng/ripple";
-import {FileUploadModule} from "primeng/fileupload";
-import {TableLazyLoadEvent, TableModule} from "primeng/table";
-import {ChipsModule} from "primeng/chips";
-import {DialogModule} from "primeng/dialog";
-import {FormsModule} from "@angular/forms";
-import {NgIf} from "@angular/common";
-import {ConfirmDialogModule} from "primeng/confirmdialog";
+import { Component, OnInit } from '@angular/core';
+import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
+import { Alergia } from "../../domain/Alergia";
+import { AlergiaService } from "../../services/alergia.service";
+import { ToastModule } from "primeng/toast";
+import { ToolbarModule } from "primeng/toolbar";
+import { ButtonModule } from "primeng/button";
+import { RippleModule } from "primeng/ripple";
+import { FileUploadModule } from "primeng/fileupload";
+import { TableLazyLoadEvent, TableModule } from "primeng/table";
+import { ChipsModule } from "primeng/chips";
+import { DialogModule } from "primeng/dialog";
+import { FormsModule } from "@angular/forms";
+import { NgIf } from "@angular/common";
+import { ConfirmDialogModule } from "primeng/confirmdialog";
 
 @Component({
   selector: 'app-info-alergia',
@@ -54,37 +54,35 @@ export class InfoAlergiaComponent implements OnInit {
   constructor(private alergiaService: AlergiaService, private messageService: MessageService, private confirmationService: ConfirmationService) {}
 
   ngOnInit() {
-    this.loadAlergias();
+    this.carregarAlergias();
   }
 
-  loadAlergias() {
+  carregarAlergias() {
     this.loading = true
-    const page: number = Math.ceil(this.first / this.rows) + 1;
-    this.alergiaService.getAlergias(page, this.rows).subscribe((data) => {
+    const pagina: number = Math.ceil(this.first / this.rows) + 1;
+    this.alergiaService.getAlergias(pagina, this.rows).subscribe((data) => {
       this.alergias = data.content;
       this.totalRecords = data.totalRecords;
       this.loading = false
     });
   }
 
-
   onLazyLoad(event: TableLazyLoadEvent) {
     this.first = event.first || 0;
     this.rows = event.rows || 10;
-    this.loadAlergias();
+    this.carregarAlergias();
   }
 
-
-  openNew() {
+  abrirNovo() {
     this.alergia = { id: '', nome: '' };
     this.submitted = false;
     this.alergiaDialog = true;
   }
 
-  deleteSelectedAlergias() {
+  deletarAlergiasSelecionadas() {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete the selected alergias?',
-      header: 'Confirm',
+      message: 'Tem certeza de que deseja excluir as alergias selecionadas?',
+      header: 'Confirmar',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         if (this.selectedAlergias && this.selectedAlergias.length > 0) {
@@ -93,30 +91,29 @@ export class InfoAlergiaComponent implements OnInit {
               () => {
                 this.alergias = this.alergias.filter((val) => !this.selectedAlergias?.includes(val));
                 this.selectedAlergias = null;
-                this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Alergias Deleted', life: 3000 });
-                this.loadAlergias();
+                this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Alergias Excluídas', life: 3000 });
+                this.carregarAlergias();
               },
               (error) => {
-                console.error('Error deleting alergias:', error);
+                console.error('Erro ao excluir alergias:', error);
               }
             );
         } else {
-          console.warn('No alergias selected for deletion.');
+          console.warn('Nenhuma alergia selecionada para exclusão.');
         }
       }
     });
   }
 
-
-  editAlergia(alergia: Alergia) {
+  editarAlergia(alergia: Alergia) {
     this.alergia = { ...alergia };
     this.alergiaDialog = true;
   }
 
-  deleteAlergia(alergia: Alergia) {
+  deletarAlergia(alergia: Alergia) {
     this.confirmationService.confirm({
-      message: 'Are you sure you want to delete ' + alergia.nome + '?',
-      header: 'Confirm',
+      message: 'Tem certeza de que deseja excluir ' + alergia.nome + '?',
+      header: 'Confirmar',
       icon: 'pi pi-exclamation-triangle',
       accept: () => {
         this.alergiaService.deleteAlergia(alergia)
@@ -124,88 +121,86 @@ export class InfoAlergiaComponent implements OnInit {
             () => {
               this.alergias = this.alergias.filter((val) => val.id !== alergia.id);
               this.alergia = { id: '', nome: '' };
-              this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Alergia Deleted', life: 3000 });
-              this.loadAlergias();
+              this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Alergia Excluída', life: 3000 });
+              this.carregarAlergias();
             },
             (error) => {
-              console.error('Error deleting alergias:', error);
+              console.error('Erro ao excluir alergias:', error);
             }
           );
       }
     });
   }
 
-  hideDialog() {
+  esconderDialog() {
     this.alergiaDialog = false;
     this.submitted = false;
   }
 
-  saveOrUpdateAlergia() {
+  salvarOuAtualizarAlergia() {
     this.submitted = true;
 
     if (!this.isFormValid()) {
-      // Se o formulário não for válido, não fecha o diálogo
       return;
     }
 
     if (this.alergia.id) {
-      this.updateAlergia();
+      this.atualizarAlergia();
     } else {
-      this.saveAlergia();
+      this.salvarAlergia();
     }
   }
 
   private isFormValid(): boolean {
     if (!this.alergia.nome?.trim()) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Name is required.', life: 3000 });
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Nome é obrigatório.', life: 3000 });
       return false;
     }
 
-    if (this.isAlergiaNameDuplicate()) {
-      this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Alergia with this name already exists.', life: 3000 });
+    if (this.isAlergiaNomeDuplicado()) {
+      this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Já existe uma alergia com este nome.', life: 3000 });
       return false;
     }
 
     return true;
   }
 
-  private isAlergiaNameDuplicate(): boolean {
-    const alergiaName = this.alergia.nome.trim().toLowerCase(); // Normaliza o nome da alergia
+  private isAlergiaNomeDuplicado(): boolean {
+    const nomeAlergia = this.alergia.nome.trim().toLowerCase();
 
-    return this.alergias.some(a => a.nome.trim().toLowerCase() === alergiaName && a.id !== this.alergia.id);
+    return this.alergias.some(a => a.nome.trim().toLowerCase() === nomeAlergia && a.id !== this.alergia.id);
   }
 
-  private saveAlergia() {
+  private salvarAlergia() {
     this.alergiaService.postAlergia(this.alergia).subscribe(
       (data) => {
-        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Alergia Created', life: 3000 });
-        this.resetDialog();
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Alergia Criada', life: 3000 });
+        this.resetarDialog();
       },
       (error) => {
-        console.error('Error saving alergia:', error);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to create alergia', life: 3000 });
+        console.error('Erro ao salvar alergia:', error);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao criar alergia', life: 3000 });
       }
     );
   }
 
-  private updateAlergia() {
+  private atualizarAlergia() {
     this.alergiaService.putAlergia(this.alergia).subscribe(
       (data) => {
-        this.messageService.add({ severity: 'success', summary: 'Successful', detail: 'Alergia Updated', life: 3000 });
-        this.resetDialog();
+        this.messageService.add({ severity: 'success', summary: 'Sucesso', detail: 'Alergia Atualizada', life: 3000 });
+        this.resetarDialog();
       },
       (error) => {
-        console.error('Error updating alergia:', error);
-        this.messageService.add({ severity: 'error', summary: 'Error', detail: 'Failed to update alergia', life: 3000 });
+        console.error('Erro ao atualizar alergia:', error);
+        this.messageService.add({ severity: 'error', summary: 'Erro', detail: 'Falha ao atualizar alergia', life: 3000 });
       }
     );
   }
 
-
-  private resetDialog() {
+  private resetarDialog() {
     this.alergiaDialog = false;
     this.alergia = { id: '', nome: '' };
-    this.loadAlergias()
+    this.carregarAlergias()
   }
 
 }
