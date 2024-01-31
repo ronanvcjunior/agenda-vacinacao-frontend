@@ -25,3 +25,40 @@ body {
   margin-bottom: 1rem;
 }
 
+.fields-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.field {
+  flex: 1 1 50%; /* Para dividir em duas colunas */
+  padding: 0 10px; /* Espaçamento entre os campos */
+  box-sizing: border-box;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.field input, .field p-calendar, .field p-dropdown, .field p-multiSelect {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.field .p-inputwrapper .p-datepicker-trigger {
+  height: 40px;
+}
+
+label {
+  font-weight: bold;
+}
+label::after {
+  content: ":";
+  font-weight: bold;
+}
+
+.p-tag {
+  margin-bottom: 0.5rem !important;
+}

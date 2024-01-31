@@ -11,7 +11,7 @@ import {Pagination} from "../domain/Pagination";
 export class AlergiaService {
   constructor(private http: HttpClient) {}
 
-  getAlergias(page: number, perPage: number): Observable<Pagination<Alergia>> {
+  getAlergias(page: number | null, perPage: number | null): Observable<Pagination<Alergia>> {
     const url: string = `${environment.apiUrl}/alergia?page=${page}&perPage=${perPage}`;
     return this.http.get<Pagination<Alergia>>(url)
   }

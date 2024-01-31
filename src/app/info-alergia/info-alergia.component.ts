@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import {ChangeDetectorRef, Component, OnInit} from '@angular/core';
 import { ConfirmationService, LazyLoadEvent, MessageService } from "primeng/api";
 import { Alergia } from "../../domain/Alergia";
 import { AlergiaService } from "../../services/alergia.service";
@@ -51,20 +51,35 @@ export class InfoAlergiaComponent implements OnInit {
   first: number = 0;
   rows: number = 10;
 
-  constructor(private alergiaService: AlergiaService, private messageService: MessageService, private confirmationService: ConfirmationService) {}
+  constructor(
+    private alergiaService: AlergiaService,
+    private messageService: MessageService,
+    private confirmationService: ConfirmationService,
+    private cdr: ChangeDetectorRef
+  ) {}
 
   ngOnInit() {
     this.carregarAlergias();
   }
 
   carregarAlergias() {
-    this.loading = true
+    this.loading = true;
     const pagina: number = Math.ceil(this.first / this.rows) + 1;
-    this.alergiaService.getAlergias(pagina, this.rows).subscribe((data) => {
-      this.alergias = data.content;
-      this.totalRecords = data.totalRecords;
-      this.loading = false
-    });
+    this.alergiaService.getAlergias(pagina, this.rows).subscribe(
+      (data) => {
+        this.alergias = data.content;
+        this.totalRecords = data.totalRecords;
+        this.loading = false;
+        this.cdr.detectChanges();
+      },
+      (error) => {
+        this.alergias = [];
+        if(error.status != 404)
+          console.error("Erro ao carregar alergias:", error);
+        this.loading = false;
+        this.cdr.detectChanges();
+      }
+    );
   }
 
   onLazyLoad(event: TableLazyLoadEvent) {
