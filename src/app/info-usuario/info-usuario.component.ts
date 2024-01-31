@@ -121,7 +121,6 @@ export class InfoUsuarioComponent implements OnInit {
     );
   }
 
-
   onLazyLoad(event: TableLazyLoadEvent) {
     this.first = event.first || 0;
     this.rows = event.rows || 10;
