@@ -1,0 +1,146 @@
+<div class="card">
+  <p-toast></p-toast>
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <button pButton pRipple label="Novo" icon="pi pi-plus" class="p-button-success mr-2" (click)="abrirNovo()"></button>
+      <button pButton pRipple label="Excluir" icon="pi pi-trash" class="p-button-danger" (click)="deletarAgendasSelecionadas()" [disabled]="!selectedAgendas || !selectedAgendas.length"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="agendas"
+    [rows]="rows"
+    [paginator]="true"
+    [globalFilterFields]="['data', 'hora', 'situacao', 'vacina.nome', 'usuario.nome']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedAgendas"
+    [rowHover]="true"
+    dataKey="id"
+    [totalRecords]="totalRecords"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} entradas"
+    [showCurrentPageReport]="true"
+    [lazy]="true"
+    (onLazyLoad)="onLazyLoad($event)"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [loading]="loading"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 4rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th>Data</th>
+        <th>Hora</th>
+        <th>Status</th>
+        <th>Vacina</th>
+        <th>Usuário</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-agenda>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="agenda"></p-tableCheckbox>
+        </td>
+        <td [pSelectableRow]="agenda"  (click)="viewDialog(agenda)">{{ agenda.data | date: 'dd/MM/yyyy' }}</td>
+        <td [pSelectableRow]="agenda"  (click)="viewDialog(agenda)">{{ agenda.hora }}</td>
+        <td [pSelectableRow]="agenda"  (click)="viewDialog(agenda)">
+          <p-tag [value]="agenda.situacao" [severity]="getStatusSeverity(agenda.situacao)"></p-tag>
+        </td>
+        <td [pSelectableRow]="agenda"  (click)="viewDialog(agenda)">{{ agenda.vacina.titulo }}</td>
+        <td [pSelectableRow]="agenda"  (click)="viewDialog(agenda)">{{ agenda.usuario.nome }}</td>
+        <td>
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editarAgenda(agenda)"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deletarAgenda(agenda)"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="summary">
+      <div class="flex align-items-center justify-content-between">No total, há {{ agendas ? agendas.length : 0 }} agendas.</div>
+    </ng-template>
+  </p-table>
+</div>
+<p-dialog [(visible)]="agendaDialog" [style]="{ width: '850px' }" header="Detalhes da Agenda" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="fields-container" *ngIf="mostrarInput">
+      <div class="field">
+        <label for="usuario">Usuário</label>
+        <p-dropdown id="usuario" appendTo="body" [(ngModel)]="agenda.usuario" [options]="usuariosOptions" placeholder="Selecione o Usuário" [required]="true"></p-dropdown>
+        <small class="p-error" *ngIf="submitted && !agenda.usuario.nome">Usuário é obrigatório.</small>
+      </div>
+      <div class="field">
+        <label for="vacina">Vacina</label>
+        <p-dropdown id="vacina" appendTo="body" [(ngModel)]="agenda.vacina" [options]="vacinasOptions" placeholder="Selecione a Vacina" [required]="true"></p-dropdown>
+        <small class="p-error" *ngIf="submitted && !agenda.vacina.titulo">Vacina é obrigatória.</small>
+      </div>
+      <div class="field">
+        <label for="data">Data do atendimento</label>
+        <p-calendar id="data" appendTo="body" [(ngModel)]="agenda.data" dateFormat="dd/mm/yy" [showIcon]="true" [required]="true" autofocus></p-calendar>
+        <small class="p-error" *ngIf="submitted && !agenda.data">Data do atendimento é obrigatória.</small>
+      </div>
+      <div class="field">
+        <label for="hora">Hora do atendimento</label>
+        <p-calendar id="hora" appendTo="body" [(ngModel)]="agenda.hora" [showTime]="true" [timeOnly]="true" hourFormat="24" [showIcon]="false" [required]="true" autofocus></p-calendar>
+        <small class="p-error" *ngIf="submitted && !agenda.data">Hora do atendimento é obrigatória.</small>
+      </div>
+      <div class="field" *ngIf="mostrarNovo">
+        <label for="situacao">Situação</label>
+        <p-dropdown id="situacao" appendTo="body" [(ngModel)]="agenda.situacao" [options]="situacaoOptions" placeholder="Selecione a Situação" [required]="true"></p-dropdown>
+        <small class="p-error" *ngIf="submitted && !agenda.situacao">Situação é obrigatória.</small>
+      </div>
+      <div class="field" *ngIf="mostrarNovo && agenda.situacao != 'AGENDADO'">
+        <label for="dataSituacao">Data da situação</label>
+        <p-calendar id="dataSituacao" appendTo="body" [(ngModel)]="agenda.dataSituacao" dateFormat="dd/mm/yy" [showIcon]="true" [required]="true" autofocus></p-calendar>
+        <small class="p-error" *ngIf="submitted && !agenda.dataSituacao">Data da situação é obrigatória.</small>
+      </div>
+      <div class="field">
+        <label for="observacoes">Observações</label>
+        <textarea id="observacoes" pInputTextarea [(ngModel)]="agenda.observacoes" rows="5" cols="30"></textarea>
+      </div>
+
+    </div>
+    <div class="fields-container" *ngIf="!mostrarInput">
+      <div class="field">
+        <label>Usuário</label>
+        {{agenda.usuario.nome}}
+      </div>
+      <div class="field">
+        <label>Vacina</label>
+        {{agenda.vacina.titulo}}
+      </div>
+      <div class="field">
+        <label>Data do Atendimento</label>
+        {{ agenda.data | date: 'dd/MM/yyyy' }}
+      </div>
+      <div class="field">
+        <label>Hora do Atendimento</label>
+        {{agenda.hora | date: 'HH:mm' }}
+      </div>
+      <div class="field">
+        <label>Situação</label>
+        {{agenda.hora | date: 'HH:mm' }}
+      </div>
+      <div class="field">
+        <label>Data da Situação</label>
+        {{agenda.dataSituacao | date: 'dd/MM/yyyy' }}
+      </div>
+      <div class="field">
+        <label>Observações</label>
+        {{agenda.observacoes }}
+      </div>
+    </div>
+  </ng-template>
+
+  <ng-template pTemplate="footer">
+    <div *ngIf="mostrarInput">
+      <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="esconderDialog()"></button>
+      <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-text" (click)="salvarOuAtualizarAgenda()"></button>
+    </div>
+    <div *ngIf="!mostrarInput">
+      <button pButton pRipple label="Editar" icon="pi pi-pencil" class="p-button-text" (click)="editarDialog()"></button>
+    </div>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>
