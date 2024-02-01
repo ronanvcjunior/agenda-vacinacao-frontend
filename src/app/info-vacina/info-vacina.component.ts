@@ -148,6 +148,10 @@ export class InfoVacinaComponent implements OnInit {
 
   editarVacina(vacina: Vacina) {
     this.vacina = { ...vacina };
+
+    if (this.vacina.periodicidade)
+      this.vacina.periodicidade = this.getPeriodicidadeText(this.vacina.periodicidade);
+
     this.vacinaDialog = true;
   }
 
