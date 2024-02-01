@@ -1,0 +1,95 @@
+<div class="card">
+  <p-toast></p-toast>
+  <p-toolbar styleClass="mb-4 gap-2">
+    <ng-template pTemplate="left">
+      <button pButton pRipple label="Nova Vacina" icon="pi pi-plus" class="p-button-success mr-2" (click)="abrirNovo()"></button>
+      <button pButton pRipple label="Excluir" icon="pi pi-trash" class="p-button-danger" (click)="deletarVacinasSelecionadas()" [disabled]="!selectedVacinas || !selectedVacinas.length"></button>
+    </ng-template>
+  </p-toolbar>
+
+  <p-table
+    #dt
+    [value]="vacinas"
+    [rows]="rows"
+    [paginator]="true"
+    [globalFilterFields]="['titulo', 'dose', 'periodicidade', 'intervalo']"
+    [tableStyle]="{ 'min-width': '75rem' }"
+    [(selection)]="selectedVacinas"
+    [rowHover]="true"
+    dataKey="id"
+    [totalRecords]="totalRecords"
+    currentPageReportTemplate="Mostrando {first} a {last} de {totalRecords} entradas"
+    [showCurrentPageReport]="true"
+    [lazy]="true"
+    (onLazyLoad)="onLazyLoad($event)"
+    [rowsPerPageOptions]="[10, 25, 50]"
+    [loading]="loading"
+  >
+    <ng-template pTemplate="header">
+      <tr>
+        <th style="width: 4rem">
+          <p-tableHeaderCheckbox></p-tableHeaderCheckbox>
+        </th>
+        <th style="min-width:15rem">Título</th>
+        <th>Dose</th>
+        <th>Intervalo</th>
+        <th>Ações</th>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="body" let-vacina>
+      <tr>
+        <td>
+          <p-tableCheckbox [value]="vacina"></p-tableCheckbox>
+        </td>
+        <td>{{ vacina.titulo }}</td>
+        <td>{{ vacina.dose }}</td>
+        <td>
+          {{ vacina.intervalo }}
+          <span *ngIf="vacina.periodicidade">{{ getPeriodicidadeText(vacina.periodicidade) }}</span>
+        </td>
+        <td>
+          <button pButton pRipple icon="pi pi-pencil" class="p-button-rounded p-button-success mr-2" (click)="editarVacina(vacina)"></button>
+          <button pButton pRipple icon="pi pi-trash" class="p-button-rounded p-button-warning" (click)="deletarVacina(vacina)"></button>
+        </td>
+      </tr>
+    </ng-template>
+    <ng-template pTemplate="summary">
+      <div class="flex align-items-center justify-content-between">No total, há {{ vacinas ? vacinas.length : 0 }} vacinas.</div>
+    </ng-template>
+  </p-table>
+</div>
+
+<p-dialog [(visible)]="vacinaDialog" [style]="{ width: '850px' }" header="Detalhes da Vacina" [modal]="true" styleClass="p-fluid">
+  <ng-template pTemplate="content">
+    <div class="fields-container">
+      <div class="field">
+        <label for="titulo">Título</label>
+        <input type="text" pInputText id="titulo" [(ngModel)]="vacina.titulo" required autofocus />
+        <small class="p-error" *ngIf="submitted && !vacina.titulo">Título é obrigatório.</small>
+      </div>
+      <div class="field">
+        <label for="dose">Dose</label>
+        <input type="number" pInputText id="dose" [(ngModel)]="vacina.dose" required min="1" />
+        <small class="p-error" *ngIf="submitted && !vacina.dose">Dose é obrigatório.</small>
+      </div>
+      <div class="field" *ngIf="vacina.dose > 1">
+        <label for="intervalo">Intervalo</label>
+        <input type="number" pInputText id="intervalo" [(ngModel)]="vacina.intervalo" required min="1" />
+        <small class="p-error" *ngIf="submitted && !vacina.intervalo">Intervalo é obrigatório.</small>
+      </div>
+      <div class="field" *ngIf="vacina.dose > 1">
+        <label for="periodicidade">Periodicidade</label>
+        <p-dropdown id="periodicidade" appendTo="body" [(ngModel)]="vacina.periodicidade" [options]="periodicidadeOptions" [showClear]="true" placeholder="Selecione a Periodicidade" [required]="true"></p-dropdown>
+        <small class="p-error" *ngIf="submitted && !vacina.periodicidade">Periodicidade é obrigatório.</small>
+      </div>
+    </div>
+  </ng-template>
+
+
+  <ng-template pTemplate="footer">
+    <button pButton pRipple label="Cancelar" icon="pi pi-times" class="p-button-text" (click)="esconderDialog()"></button>
+    <button pButton pRipple label="Salvar" icon="pi pi-check" class="p-button-text" (click)="salvarOuAtualizarVacina()"></button>
+  </ng-template>
+</p-dialog>
+
+<p-confirmDialog [style]="{ width: '450px' }"></p-confirmDialog>

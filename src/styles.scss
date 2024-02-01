@@ -1,1 +1,64 @@
 /* You can add global styles to this file, and also import other style files */
+@import 'primeflex/primeflex.css';
+@import "primeng/resources/themes/lara-light-blue/theme.css";
+@import "primeng/resources/primeng.css";
+@import "primeicons/primeicons.css";
+
+html {
+  font-size: 14px;
+}
+
+body {
+  font-family: var(--font-family);
+  font-weight: normal;
+  background: var(--surface-ground);
+  color: var(--text-color);
+  padding: 1rem;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.card {
+  background: var(--surface-card);
+  padding: 2rem;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.fields-container {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+.field {
+  flex: 1 1 50%; /* Para dividir em duas colunas */
+  padding: 0 10px; /* Espaçamento entre os campos */
+  box-sizing: border-box;
+}
+
+.field label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+.field input, .field p-calendar, .field p-dropdown, .field p-multiSelect {
+  width: 100%;
+  box-sizing: border-box;
+  margin-bottom: 10px;
+}
+
+.field .p-inputwrapper .p-datepicker-trigger {
+  height: 40px;
+}
+
+label {
+  font-weight: bold;
+}
+label::after {
+  content: ":";
+  font-weight: bold;
+}
+
+.p-tag {
+  margin-bottom: 0.5rem !important;
+}
