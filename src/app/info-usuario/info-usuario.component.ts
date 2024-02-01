@@ -205,6 +205,9 @@ export class InfoUsuarioComponent implements OnInit {
       return;
     }
 
+
+    this.usuario.dataNascimento.setTime(this.usuario.dataNascimento.getTime() - 3 * 60 * 60 * 1000)
+
     if (this.usuario.id) {
       this.atualizarUsuario();
     } else {
